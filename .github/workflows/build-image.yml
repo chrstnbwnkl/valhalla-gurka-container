@@ -1,0 +1,151 @@
+name: Publish Container Image
+on:
+  schedule:
+    - cron: "0 9 * * 6" # Sat morning at 9AM
+  workflow_dispatch:
+  
+jobs:
+  checkout_valhalla:
+    outputs:
+      new_commit: ${{ steps.newcommit.outputs.sha }}
+      tags: ${{ steps.tags.outputs.tags }}
+
+    runs-on: "ubuntu-24"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+          fetch-depth: 0
+
+      - name: Configure git
+        shell: bash
+        run: |
+          set -e 
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Get current submodule commit
+        id: oldcommit
+        run: |
+          cd valhalla
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Update submodule & push
+        run: |
+          git submodule update --remote valhalla
+          git add valhalla
+          git commit -m "Update valhalla to latest master" || echo "No changes to commit"
+          git push origin HEAD
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+
+      - name: Get new submodule commit
+        id: newcommit
+        run: |
+          cd valhalla
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Get new tags since last update
+        id: tags
+        run: |
+          cd valhalla
+          git fetch --tags
+          NEW_TAGS=$(git tag --contains ${{ steps.newcommit.outputs.sha }} | xargs)
+          echo "tags=$NEW_TAGS" >> $GITHUB_OUTPUT
+
+  build_and_publish: 
+    needs: [checkout_valhalla]
+    env:
+      IMAGE_NAME: strategy:ghcr.io/chrstnbwnkl/valhalla-dev
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: linux/amd64
+            tagsuffix: amd64
+          - os: ubuntu-24.04-arm
+            platform: linux/arm64
+            tagsuffix: arm64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push latest
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Containerfile
+          provenance: false # needed to be able to converge into one image
+          platforms: ${{ matrix.platform }}
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:latest-${{ matrix.tagsuffix }}
+          cache-from: type=gha,scope=${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+          build-args: |
+            VERSION_MODIFIER=${{ steps.extract_gitsha.outputs.version_modifier }}
+
+      - name: Build and push tag(s)
+        if: needs.checkout_valhalla.outputs.tags != ''
+        run: |
+          cd valhalla
+          for tag in ${{ needs.checkout_valhalla.outputs.tags }}; do
+            echo "Checking out tag $tag"
+            git fetch --tags
+            git checkout $tag
+            cd ..
+            docker buildx build \
+              --file Containerfile \
+              --provenance=false \
+              --cache-to="type=gha,mode=max,scope=${{ matrix.platform }}" \
+              --cache-from="type=gha,scope=${{ matrix.platform }}" \
+              --platform linux/${{ matrix.platform }} \
+              --push \
+              -t $IMAGE_NAME:$tag-${{ matrix.platform }} \
+              .
+            cd valhalla
+          done
+
+  create-manifests:
+    runs-on: ubuntu-latest
+    needs: [build_and_publish]
+    env:
+      IMAGE_NAME: strategy:ghcr.io/chrstnbwnkl/valhalla-dev
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push tag(s) manifest
+        if: needs.checkout_valhalla.outputs.tags != ''
+        run: |
+          for tag in ${{ needs.checkout_valhalla.outputs.tags }}; do
+            docker manifest create \
+              $IMAGE_NAME:$tag \
+              --amend $IMAGE_NAME:$tag-amd64 \
+              --amend $IMAGE_NAME:$tag-arm64 
+            docker manifest push $IMAGE_NAME:$tag
+          done
+
+      - name: Create and push latest manifest
+        run: |
+          docker manifest create \
+            $IMAGE_NAME:latest \
+            --amend $IMAGE_NAME:latest-amd64 \
+            --amend $IMAGE_NAME:latest-arm64 
+          docker manifest push $IMAGE_NAME:latest
+
