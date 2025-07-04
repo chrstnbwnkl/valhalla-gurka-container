@@ -85,7 +85,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Containerfile
+          file: ./Containerfile
           provenance: false # needed to be able to converge into one image
           platforms: ${{ matrix.platform }}
           push: true
@@ -105,7 +105,7 @@ jobs:
             git checkout $tag
             cd ..
             docker buildx build \
-              --file Containerfile \
+              --file ./Containerfile \
               --provenance=false \
               --cache-to="type=gha,mode=max,scope=${{ matrix.platform }}" \
               --cache-from="type=gha,scope=${{ matrix.platform }}" \
