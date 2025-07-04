@@ -95,6 +95,7 @@ jobs:
 
       - name: Build and push latest
         uses: docker/build-push-action@v6
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.tags != ''
         with:
           context: .
           file: ./Containerfile
@@ -125,7 +126,7 @@ jobs:
               --provenance=false \
               --cache-to="type=gha,mode=max,scope=${{ matrix.platform }}" \
               --cache-from="type=gha,scope=${{ matrix.platform }}" \
-              --build-arg="VERSION_MODIFIER=${{ needs.checkout_valhalla.output.new_commit }}"
+              --build-arg="VERSION_MODIFIER=${{ needs.checkout_valhalla.output.new_commit }}" \
               --platform linux/${{ matrix.platform }} \
               --push \
               -t $IMAGE_NAME:$tag-${{ matrix.platform }} \
@@ -162,6 +163,7 @@ jobs:
           done
 
       - name: Create and push latest manifest
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.tags != ''
         run: |
           docker manifest create \
             $IMAGE_NAME:latest \
