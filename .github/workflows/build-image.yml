@@ -95,7 +95,7 @@ jobs:
 
       - name: Build and push latest
         uses: docker/build-push-action@v6
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.tags != ''
+        if: ${{ !(github.event_name == 'workflow_dispatch' && github.event.inputs.tags != '') }}
         with:
           context: .
           file: ./Containerfile
@@ -148,7 +148,7 @@ jobs:
           password: ${{ secrets.MYPAT }}
 
       - name: Create and push tag(s) manifest
-        if: needs.checkout_valhalla.outputs.tags != '' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tags != '')
+        if: ${{ !(github.event_name == 'workflow_dispatch' && github.event.inputs.tags != '') }}
         run: |
          TAGS="${{ github.event.inputs.tags }}"
           if [ -z "$TAGS" ]; then
