@@ -148,7 +148,7 @@ jobs:
           password: ${{ secrets.MYPAT }}
 
       - name: Create and push tag(s) manifest
-        if: ${{ !(github.event_name == 'workflow_dispatch' && github.event.inputs.tags != '') }}
+        if: needs.checkout_valhalla.outputs.tags != '' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tags != '')
         run: |
          TAGS="${{ github.event.inputs.tags }}"
           if [ -z "$TAGS" ]; then
@@ -163,7 +163,7 @@ jobs:
           done
 
       - name: Create and push latest manifest
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.tags != ''
+        if: ${{ !(github.event_name == 'workflow_dispatch' && github.event.inputs.tags != '') }}
         run: |
           docker manifest create \
             $IMAGE_NAME:latest \
