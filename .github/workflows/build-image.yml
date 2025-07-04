@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "0 9 * * 6" # Sat morning at 9AM
   workflow_dispatch:
+    inputs:
+      tags:
+        description: "Comma-separated list of tags to build for"
+        required: false
+        default: ""
   
 jobs:
   checkout_valhalla:
@@ -103,7 +108,7 @@ jobs:
             VERSION_MODIFIER=${{ needs.checkout_valhalla.output.new_commit }}
 
       - name: Build and push tag(s)
-        if: needs.checkout_valhalla.outputs.tags != ''
+        if: needs.checkout_valhalla.outputs.tags != '' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tags != '')
         run: |
           cd valhalla
           for tag in ${{ needs.checkout_valhalla.outputs.tags }}; do
@@ -128,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build_and_publish]
     env:
-      IMAGE_NAME: strategy:ghcr.io/chrstnbwnkl/valhalla-dev
+      IMAGE_NAME: ghcr.io/chrstnbwnkl/valhalla-dev
     steps:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
@@ -138,7 +143,7 @@ jobs:
           password: ${{ secrets.MYPAT }}
 
       - name: Create and push tag(s) manifest
-        if: needs.checkout_valhalla.outputs.tags != ''
+        if: needs.checkout_valhalla.outputs.tags != '' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tags != '')
         run: |
           for tag in ${{ needs.checkout_valhalla.outputs.tags }}; do
             docker manifest create \
