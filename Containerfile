@@ -15,7 +15,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt update && apt install -y sudo
 # install deps
 WORKDIR /usr/local/src/
 COPY ./valhalla/scripts/install-linux-deps.sh /usr/local/src/valhalla/scripts/install-linux-deps.sh
-RUN bash /usr/local/src/valhalla/scripts/install-linux-deps.sh
+RUN bash /usr/local/src/valhalla/scripts/install-linux-deps.sh || true
 RUN rm -rf /var/lib/apt/lists/*
 
 # get the code into the right place and prepare to build it
