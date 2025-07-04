@@ -125,7 +125,7 @@ jobs:
               --provenance=false \
               --cache-to="type=gha,mode=max,scope=${{ matrix.platform }}" \
               --cache-from="type=gha,scope=${{ matrix.platform }}" \
-              --build-args="VERSION_MODIFIER=${{ needs.checkout_valhalla.output.new_commit }}"
+              --build-arg="VERSION_MODIFIER=${{ needs.checkout_valhalla.output.new_commit }}"
               --platform linux/${{ matrix.platform }} \
               --push \
               -t $IMAGE_NAME:$tag-${{ matrix.platform }} \
