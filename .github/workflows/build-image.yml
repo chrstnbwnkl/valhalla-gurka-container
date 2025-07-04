@@ -111,7 +111,11 @@ jobs:
         if: needs.checkout_valhalla.outputs.tags != '' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tags != '')
         run: |
           cd valhalla
-          for tag in ${{ needs.checkout_valhalla.outputs.tags }}; do
+          TAGS="${{ github.event.inputs.tags }}"
+          if [ -z "$TAGS" ]; then
+            TAGS="${{ needs.checkout_valhalla.outputs.tags }}"
+          fi
+          for tag in $TAGS; do
             echo "Checking out tag $tag"
             git fetch --tags
             git checkout $tag
@@ -145,7 +149,11 @@ jobs:
       - name: Create and push tag(s) manifest
         if: needs.checkout_valhalla.outputs.tags != '' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tags != '')
         run: |
-          for tag in ${{ needs.checkout_valhalla.outputs.tags }}; do
+         TAGS="${{ github.event.inputs.tags }}"
+          if [ -z "$TAGS" ]; then
+            TAGS="${{ needs.checkout_valhalla.outputs.tags }}"
+          fi
+          for tag in $TAGS; do
             docker manifest create \
               $IMAGE_NAME:$tag \
               --amend $IMAGE_NAME:$tag-amd64 \
