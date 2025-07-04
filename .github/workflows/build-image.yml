@@ -71,6 +71,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+          fetch-depth: 0
+          token: ${{ secrets.MYPAT }}
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -93,7 +100,7 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.platform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
           build-args: |
-            VERSION_MODIFIER=${{ steps.extract_gitsha.outputs.version_modifier }}
+            VERSION_MODIFIER=${{ needs.checkout_valhalla.output.new_commit }}
 
       - name: Build and push tag(s)
         if: needs.checkout_valhalla.outputs.tags != ''
@@ -109,6 +116,7 @@ jobs:
               --provenance=false \
               --cache-to="type=gha,mode=max,scope=${{ matrix.platform }}" \
               --cache-from="type=gha,scope=${{ matrix.platform }}" \
+              --build-args="VERSION_MODIFIER=${{ needs.checkout_valhalla.output.new_commit }}"
               --platform linux/${{ matrix.platform }} \
               --push \
               -t $IMAGE_NAME:$tag-${{ matrix.platform }} \
