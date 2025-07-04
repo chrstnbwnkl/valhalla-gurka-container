@@ -38,7 +38,7 @@ jobs:
           git commit -m "Update valhalla to latest master" || echo "No changes to commit"
           git push origin HEAD
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+          GITHUB_TOKEN: ${{ secrets.MYPAT }}
 
       - name: Get new submodule commit
         id: newcommit
@@ -77,7 +77,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.MYPAT }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -128,7 +128,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.MYPAT }}
 
       - name: Create and push tag(s) manifest
         if: needs.checkout_valhalla.outputs.tags != ''
