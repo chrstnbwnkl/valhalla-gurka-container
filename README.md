@@ -41,10 +41,10 @@ You can read more about Gurka [here](https://github.com/valhalla/valhalla/blob/m
 Just pull the image and use it to integrate with your own application:
 
 ```sh 
-docker pull ghcr.io/chrstnbwnkl/valhalla-dev:latest
+docker pull ghcr.io/chrstnbwnkl/valhalla-gurka-container/valhalla-dev:latest
 
 # or if you want a specific version of Valhalla (reach out if you need an older version)
-docker pull ghcr.io/chrstnbwnkl/valhalla-dev:3.5.1
+docker pull ghcr.io/chrstnbwnkl/valhalla-gurka-container/valhalla-dev:3.5.1
 ```
 
 The image contains a release build of Valhalla with debug information along with Valhalla's test library and headers that you can link your project against if you want to write your own Gurka tests. 
