@@ -59,7 +59,7 @@ ENV LD_LIBRARY_PATH=/usr/local/lib:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-g
 
 # github packaging niceties
 LABEL org.opencontainers.image.description="Valhalla Development Environment"
-LABEL org.opencontainers.image.source="github.com/chrstnbwnkl/valhalla-gurka-docker/"
+LABEL org.opencontainers.image.source https://github.com/chrstnbwnkl/valhalla-gurka-container
 
 # we need to add back some runtime dependencies for binaries and scripts
 # install all the posix locales that we support
