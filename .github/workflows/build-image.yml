@@ -17,6 +17,7 @@ jobs:
         with:
           submodules: "recursive"
           fetch-depth: 0
+          token: ${{ secrets.MYPAT }}
 
       - name: Configure git
         shell: bash
@@ -37,8 +38,6 @@ jobs:
           git add valhalla
           git commit -m "Update valhalla to latest master" || echo "No changes to commit"
           git push origin HEAD
-        env:
-          GITHUB_TOKEN: ${{ secrets.MYPAT }}
 
       - name: Get new submodule commit
         id: newcommit
