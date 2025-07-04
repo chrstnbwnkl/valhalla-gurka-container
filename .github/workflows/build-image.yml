@@ -56,7 +56,7 @@ jobs:
   build_and_publish: 
     needs: [checkout_valhalla]
     env:
-      IMAGE_NAME: strategy:ghcr.io/chrstnbwnkl/valhalla-dev
+      IMAGE_NAME: ghcr.io/chrstnbwnkl/valhalla-dev
     strategy:
       fail-fast: true
       matrix:
