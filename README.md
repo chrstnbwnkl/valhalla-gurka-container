@@ -52,7 +52,7 @@ The image contains a release build of Valhalla with debug information along with
 `cmake/FindValhallaTest.cmake` contains an example module that you can use for linking. You can copy that module into your project and use it like this: 
 
 ```cmake 
-# Filename: CMakeLists.txt
+# in your CMakeLists.txt
 find_package(ValhallaTest REQUIRED)
 
 # Valhalla vendors googletest
