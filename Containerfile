@@ -56,19 +56,17 @@ LABEL org.opencontainers.image.authors="Christian Beiwinkel <chrstn@bwnkl.de>"
 # basic paths
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/lib:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/lib32:/usr/lib32
+ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${LD_LIBRARY_PATH}"
 
 # github packaging niceties
 LABEL org.opencontainers.image.description="Valhalla Development Environment"
 LABEL org.opencontainers.image.source https://github.com/chrstnbwnkl/valhalla-gurka-container
 
-# we need to add back some runtime dependencies for binaries and scripts
-# install all the posix locales that we support
+# Install some dev packages and build tools for the downstream project
 RUN export DEBIAN_FRONTEND=noninteractive && apt update && \
   apt install -y \
-  libcurl4 libczmq4 libluajit-5.1-2 libgdal34 \
-  libprotobuf-lite32 libsqlite3-0 libsqlite3-mod-spatialite libzmq5 zlib1g \
-  curl gdb locales parallel python3-minimal python-is-python3 python3-shapely python3-requests \
-  spatialite-bin unzip wget && rm -rf /var/lib/apt/lists/*
+  cmake build-essential libcurl4-openssl-dev pkg_conf libczmq-dev libluajit-5.1-dev libgdal-dev \
+  libprotobuf-dev libsqlite3-dev python3 libsqlite3-mod-spatialite libspatialite-dev libzmq3-dev zlib1g-dev locales && rm -rf /var/lib/apt/lists/*
 
 # grab the builder stages artifacts
 COPY --from=builder /usr/local /usr/local
