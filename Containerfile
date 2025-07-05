@@ -65,7 +65,7 @@ LABEL org.opencontainers.image.source https://github.com/chrstnbwnkl/valhalla-gu
 # Install some dev packages and build tools for the downstream project
 RUN export DEBIAN_FRONTEND=noninteractive && apt update && \
   apt install -y \
-  cmake build-essential libcurl4-openssl-dev pkg_conf libczmq-dev libluajit-5.1-dev libgdal-dev \
+  cmake build-essential libcurl4-openssl-dev pkgconf libczmq-dev libluajit-5.1-dev libgdal-dev \
   libprotobuf-dev libsqlite3-dev python3 libsqlite3-mod-spatialite libspatialite-dev libzmq3-dev zlib1g-dev locales && rm -rf /var/lib/apt/lists/*
 
 # grab the builder stages artifacts
