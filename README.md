@@ -1,6 +1,6 @@
 # Valhalla Test Container Image
 
-A container image containing dependencies to write your own Gurka tests for applications using Valhalla's C++ API.
+A container image for writing your own Gurka tests for applications using Valhalla's C++ API
 
 ## Introduction 
 
