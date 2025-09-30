@@ -33,6 +33,10 @@ RUN make install
 # manually copy test lib and headers
 RUN cp ./test/libvalhalla_test.a /usr/local/lib/ && cp ../test/test.h /usr/local/include/valhalla && cp ../test/gurka/gurka.h /usr/local/include/valhalla
 
+# upstream stopped installing googletest 
+WORKDIR /usr/local/src/valhalla/third_party/googletest/
+RUN cp -r ./googlemock/include/gmock /usr/local/include && cp -r ./googletest/include/gtest /usr/local/include 
+
 # we wont leave the source around but we'll drop the commit hash we'll also keep the locales
 WORKDIR /usr/local/src
 RUN cd valhalla && echo "https://github.com/valhalla/valhalla/tree/$(git rev-parse HEAD)" > ../valhalla_version

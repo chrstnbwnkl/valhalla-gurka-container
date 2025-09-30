@@ -1,3 +1,4 @@
 Containerfile
 /cmake/
 /.github/
+/third_party/
