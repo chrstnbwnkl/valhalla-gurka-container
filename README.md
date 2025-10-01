@@ -55,12 +55,12 @@ The image contains a release build of Valhalla with debug information along with
 # in your CMakeLists.txt
 find_package(ValhallaTest REQUIRED)
 
-# Valhalla vendors googletest
-pkg_check_modules(GMOCK REQUIRED IMPORTED_TARGET gmock)
-pkg_check_modules(GTEST_MAIN REQUIRED IMPORTED_TARGET gtest_main)
-pkg_check_modules(GTEST REQUIRED IMPORTED_TARGET gtest)
+# valhalla does not vendor googletest, so include it yourself, 
+# best as a submodule pointing to the same commit as Valhalla
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/googletest ${CMAKE_BINARY_DIR}/googletest)
 
-target_link_libraries(${your_test} PkgConfig::GTEST PkgConfig::GTEST_MAIN PkgConfig::GMOCK ${VALHALLA_TEST_LIB})
+target_link_libraries(${your_test} gtest gtest_main gmock ${VALHALLA_TEST_LIB})
 ``` 
 
 
